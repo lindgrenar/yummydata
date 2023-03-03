@@ -33,6 +33,7 @@ class JobScraper:
         self.data = None
         self.query = query
         self.harvested_ids = []
+        self.create_database()
 
     def jobid_harvester(self):
         """
@@ -53,14 +54,22 @@ class JobScraper:
                     break
                 for ad in ads:
                     self.harvested_ids.append(ad['id'])
+                    print(f"Found:  {ad['id']}")
                 data['startIndex'] += 25
+
+    def create_database(self):
+        conn = sqlite3.connect('dataset.db')
+        cursor = conn.cursor()
+        cursor.execute(
+            '''CREATE TABLE IF NOT EXISTS jobids (ID INTEGER PRIMARY KEY, rawtext TEXT, company TEXT, title TEXT, preprocessed TEXT)''')
+        cursor.close()
 
     def database_commit(self):
         """
         Commits the harvested job IDs to a SQLite database.
         """
         try:
-            conn = sqlite3.connect('./venv/jobid.db')
+            conn = sqlite3.connect('dataset.db')
             c = conn.cursor()
             # Create a table if it doesn't exist
             c.execute(
@@ -86,7 +95,7 @@ class JobScraper:
         Fetches job data from the Platsbanken API and stores it in a SQLite database.
         """
         try:
-            conn = sqlite3.connect('./venv/jobid.db')
+            conn = sqlite3.connect('dataset.db')
             c = conn.cursor()
             # Create a table if it doesn't exist
             c.execute(
