@@ -60,7 +60,7 @@ class JobScraper:
         Commits the harvested job IDs to a SQLite database.
         """
         try:
-            conn = sqlite3.connect('jobid.db')
+            conn = sqlite3.connect('./venv/jobid.db')
             c = conn.cursor()
             # Create a table if it doesn't exist
             c.execute(
@@ -78,14 +78,15 @@ class JobScraper:
             print(f"Error: Failed to connect to database or execute SQL statement: {e}")
 
         finally:
-            conn.close()
+            if conn:
+                conn.close()
 
     def fetch_data_platsbanken(self):
         """
         Fetches job data from the Platsbanken API and stores it in a SQLite database.
         """
         try:
-            conn = sqlite3.connect('jobid.db')
+            conn = sqlite3.connect('./venv/jobid.db')
             c = conn.cursor()
             # Create a table if it doesn't exist
             c.execute(
@@ -129,8 +130,10 @@ class JobScraper:
 
         except sqlite3.Error as e:
             print(f"Error: Failed to connect to database or execute SQL statement: {e}")
+            conn = None
         finally:
-            conn.close()
+            if conn:
+                conn.close()
 
     def run(self):
         """
@@ -139,3 +142,8 @@ class JobScraper:
         self.jobid_harvester()
         self.database_commit()
         self.fetch_data_platsbanken()
+
+
+if __name__ == '__main__':
+    scraper = JobScraper("devops")
+    scraper.run()
